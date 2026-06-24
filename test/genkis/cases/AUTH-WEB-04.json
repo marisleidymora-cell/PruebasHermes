@@ -1,0 +1,15 @@
+{
+  "id": "AUTH-WEB-04",
+  "title": "Recuperar contraseña via email",
+  "type": "funcional",
+  "priority": "Alta",
+  "preconditions": "Email registrado",
+  "data": {"email": "usuario@ejemplo.com"},
+  "steps": [
+    "Solicitar 'Olvidé mi contraseña'",
+    "Recibir email con enlace y token",
+    "Seguir enlace y cambiar contraseña"
+  ],
+  "expected": "Enlace con token único y expiración; nueva contraseña permite login",
+  "automatable": false
+}

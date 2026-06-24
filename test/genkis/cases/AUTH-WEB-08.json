@@ -1,0 +1,13 @@
+{
+  "id": "AUTH-WEB-08",
+  "title": "Protecciones contra fuerza bruta (rate limiting)",
+  "type": "seguridad",
+  "priority": "Alta",
+  "preconditions": "Ninguna",
+  "data": {},
+  "steps": [
+    "Realizar varios intentos fallidos de login (ej. 10) desde la misma IP"
+  ],
+  "expected": "Bloqueo temporal o captcha; respuestas uniformes; registro en logs",
+  "automatable": true
+}

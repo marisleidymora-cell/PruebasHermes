@@ -1,0 +1,15 @@
+{
+  "id": "AUTH-WEB-01",
+  "title": "Inicio de sesión exitoso (UI)",
+  "type": "funcional",
+  "priority": "Alta",
+  "preconditions": "Usuario activo registrado",
+  "data": {"email": "usuario@ejemplo.com", "password": "Correct@123"},
+  "steps": [
+    "Abrir la página de login",
+    "Rellenar email y password",
+    "Clicar 'Iniciar sesión'"
+  ],
+  "expected": "Redirección al dashboard; cookie de sesión presente",
+  "automatable": true
+}

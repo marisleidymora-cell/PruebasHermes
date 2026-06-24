@@ -1,0 +1,13 @@
+{
+  "id": "AUTH-WEB-05",
+  "title": "Login con credenciales inválidas",
+  "type": "negativo",
+  "priority": "Alta",
+  "preconditions": "Ninguna",
+  "data": {"email": "usuario@ejemplo.com", "password": "WrongPass"},
+  "steps": [
+    "Intentar login con password incorrecta"
+  ],
+  "expected": "Mensaje genérico 'Credenciales inválidas'; status 401; no indicar existencia de cuenta",
+  "automatable": true
+}

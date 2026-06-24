@@ -1,0 +1,13 @@
+{
+  "id": "AUTH-WEB-02",
+  "title": "Cierre de sesión (UI)",
+  "type": "funcional",
+  "priority": "Alta",
+  "preconditions": "Usuario autenticado",
+  "data": {},
+  "steps": [
+    "Click en 'Cerrar sesión'"
+  ],
+  "expected": "Redirige a login; acceso a rutas protegidas devuelve 401 o redirección a login",
+  "automatable": true
+}

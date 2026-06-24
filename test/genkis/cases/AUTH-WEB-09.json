@@ -1,0 +1,13 @@
+{
+  "id": "AUTH-WEB-09",
+  "title": "Cookies seguras y flags (HttpOnly, Secure, SameSite)",
+  "type": "seguridad",
+  "priority": "Alta",
+  "preconditions": "Usuario autenticado",
+  "data": {},
+  "steps": [
+    "Iniciar sesión y revisar cookies en la respuesta HTTP"
+  ],
+  "expected": "Cookies de sesión con Secure, HttpOnly y SameSite conforme políticas",
+  "automatable": true
+}

@@ -1,0 +1,15 @@
+{
+  "id": "AUTH-WEB-13",
+  "title": "MFA (TOTP/SMS) - código válido e inválido",
+  "type": "seguridad",
+  "priority": "Alta",
+  "preconditions": "Usuario con MFA configurado",
+  "data": {},
+  "steps": [
+    "Realizar login con credenciales",
+    "Solicitar código MFA válido y verificar acceso",
+    "Probar código inválido y verificar rechazo"
+  ],
+  "expected": "Acceso solo con código correcto; códigos expiran y no son reutilizables",
+  "automatable": false
+}

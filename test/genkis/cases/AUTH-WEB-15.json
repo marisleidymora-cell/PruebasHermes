@@ -1,0 +1,14 @@
+{
+  "id": "AUTH-WEB-15",
+  "title": "Refresh token flow y rotación",
+  "type": "API",
+  "priority": "Alta",
+  "preconditions": "Poseer refresh token válido",
+  "data": {},
+  "steps": [
+    "Usar refresh token para obtener nuevo access token",
+    "Verificar que el refresh token antiguo queda invalidado si aplica rotación"
+  ],
+  "expected": "Nuevo access token con 200; refresh token inválido produce 401",
+  "automatable": true
+}

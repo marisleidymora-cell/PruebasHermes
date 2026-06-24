@@ -1,0 +1,15 @@
+{
+  "id": "AUTH-WEB-11",
+  "title": "Expiración y revocación de tokens",
+  "type": "seguridad",
+  "priority": "Alta",
+  "preconditions": "Obtener access token válido",
+  "data": {},
+  "steps": [
+    "Obtener access token",
+    "Revocar token o esperar a expiración",
+    "Intentar usar token para acceder a recurso protegido"
+  ],
+  "expected": "Acceso rechazado tras revocación/expiración (401)",
+  "automatable": true
+}
