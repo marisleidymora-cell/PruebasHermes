@@ -7,7 +7,7 @@ Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el c�
 ## Cambios que hicimos
 - Documentación:
   - Actualizamos `docs/test_cases.md` para alinear el escenario de alertas caídas.
-  - Guardamos la ejecución real en `docs/ejecucion_suite_qa.md`.
+  - Guardamos la ejecución real en `docs/ejecucion_suite_qa.md` con capturas de evidencia.
   - Creamos esta bitácora para ir anotando lo que avanzamos.
 - Pruebas API:
   - `tests/api/test_api_contract.py`
@@ -20,6 +20,11 @@ Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el c�
   - `tests/e2e/test_frontend_flow.py`
   - `tests/e2e/test_ui_registration_and_alerts.py`
   - `tests/e2e/test_home.py` ajustada para exponer fixture y URL base.
+- Evidencia:
+  - Capturas de E2E en `docs/evidencia/` insertadas en `docs/ejecucion_suite_qa.md`.
+- Repo:
+  - Commit y push en rama `yeraldine`.
+  - Limpieza de `.DS_Store` en `.gitignore`.
 
 ## Estado actual
 - API: confirmada verde en `tests/api` (18 pruebas pasadas).
