@@ -27,12 +27,13 @@ Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el c�
   - Limpieza de `.DS_Store` en `.gitignore`.
 
 ## Estado actual
-- API: confirmada verde en `tests/api` (18 pruebas pasadas).
+- API: suite documentada inline (27 pruebas totales API+E2E).
 - E2E: suite completa ejecutada (`tests/e2e -q`) con SUT levantado en `http://localhost:8000`.
   - 9 pruebas pasadas.
   - 0 pruebas fallidas.
 - Cierre de pendiente: `test_alerts_section_shows_503_when_alert_service_down` ajustada para levantar un servidor auxiliar con `ALERTS_FAIL=1` y validar 503 desde la UI.
   - Clasificación: hallazgo cubierto con prueba automatizada.
+- Documentación inline completada en archivos `tests/api/*.py` y `tests/e2e/*.py`.
 
 ## Pendientes / Riesgos abiertos
 - Ninguno pendiente documentado.
@@ -41,3 +42,4 @@ Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el c�
 - No se modificó el sistema `gestor-inventario` en ningún momento.
 - Todo el trabajo quedó en la rama `yeraldine` del repo `PruebasHermes`.
 - Documentación adicional: `docs/resumen_qa.md` con descripción del SUT, hallazgos y comandos de ejecución.
+- Último commit: `c415105` (docs, código y cierre 503) — pusheado a `origin/yeraldine`.
