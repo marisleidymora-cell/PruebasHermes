@@ -1,5 +1,5 @@
 # Bitácora QA — rama yeraldine
-Última actualización: 2026-06-26
+Última actualización: 2026-06-30
 
 ## Resumen del día
 Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el código del sistema; solo armamos pruebas automáticas y documentación.
@@ -29,15 +29,15 @@ Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el c�
 ## Estado actual
 - API: confirmada verde en `tests/api` (18 pruebas pasadas).
 - E2E: suite completa ejecutada (`tests/e2e -q`) con SUT levantado en `http://localhost:8000`.
-  - 6 pruebas pasadas.
-  - 1 prueba fallida: `test_alerts_section_shows_503_when_alert_service_down` por timeout esperando `/api/stock/alerts`.
-    - Causa confirmada: con SUT corriendo, `ALERTS_FAIL=1` no dispara 503 en `/api/stock/alerts`; no es bloqueo de red.
-    - Clasificación: hallazgo de comportamiento / limitación del escenario simulado.
+  - 9 pruebas pasadas.
+  - 0 pruebas fallidas.
+- Cierre de pendiente: `test_alerts_section_shows_503_when_alert_service_down` ajustada para levantar un servidor auxiliar con `ALERTS_FAIL=1` y validar 503 desde la UI.
+  - Clasificación: hallazgo cubierto con prueba automatizada.
 
 ## Pendientes / Riesgos abiertos
-- Escenario 503 desde UI (E2E): no cerrado porque el comportamiento del SUT no replica el fallo simulado documentado en la guía del reto.
+- Ninguno pendiente documentado.
 
 ## Notas
 - No se modificó el sistema `gestor-inventario` en ningún momento.
 - Todo el trabajo quedó en la rama `yeraldine` del repo `PruebasHermes`.
-- Podés pedirme que lea cualquiera de los docs para continuar sin repetir contexto.
+- Documentación adicional: `docs/resumen_qa.md` con descripción del SUT, hallazgos y comandos de ejecución.

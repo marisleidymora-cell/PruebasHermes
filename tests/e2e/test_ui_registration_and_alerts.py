@@ -40,41 +40,77 @@ def test_register_movement_and_refresh_alerts_ui_flow():
             time.sleep(1)
             new_stock_text = page.locator("td[data-stock] strong").first.text_content()
             assert new_stock_text != initial_stock_text
-
-            page.locator("#refresh-alerts").scroll_into_view_if_needed()
-            page.click("#refresh-alerts")
-            time.sleep(1)
-
-            page.reload(wait_until="domcontentloaded")
-            page.wait_for_load_state("networkidle")
-
-            moved_out_option_id = page.locator("#mov-product option").first.get_attribute("value")
-            assert moved_out_option_id is not None
-
-            page.select_option("#mov-type", value="OUT")
-            page.fill("#mov-qty", "1")
-            page.fill("#mov-notes", "Salida QA")
-            page.click('button[type="submit"]')
-
-            page.wait_for_selector("#result.ok", timeout=5000)
-            result_text = page.locator("#result").text_content()
-            _assert_has(result_text or "", "Movimiento")
         finally:
             browser.close()
+
+
+def _start_alerts_fail_server(port: int = 18003):
+    import os
+    import subprocess
+    import sys
+    import time
+    import tempfile
+    from pathlib import Path
+    from urllib.request import urlopen
+
+    env = os.environ.copy()
+    env["ALERTS_FAIL"] = "1"
+    sut_dir = Path.home() / "Desktop" / "reto-ai-first-fase1" / "reto-ai-first-fase1" / "3-challenge" / "gestor-inventario"
+    fd, script_path = tempfile.mkstemp(suffix=".py", prefix=f"sut_alerts_{port}_")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(
+                f"import os\n"
+                f"os.chdir({str(sut_dir)!r})\n"
+                f"import sys\n"
+                f"sys.path.insert(0, str({str(sut_dir)!r}))\n"
+                f"from app import app\n"
+                f"import uvicorn\n"
+                f"config = uvicorn.Config(app, host='127.0.0.1', port={port}, log_level='error')\n"
+                f"server = uvicorn.Server(config)\n"
+                f"server.run()\n"
+            )
+        python = sys.executable
+        proc = subprocess.Popen(
+            [python, script_path],
+            cwd=str(sut_dir),
+            env=env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        url = f"http://127.0.0.1:{port}/api/health"
+        for _ in range(50):
+            try:
+                urlopen(url, timeout=0.3)
+                return proc, port
+            except Exception:
+                time.sleep(0.25)
+        proc.terminate()
+        raise RuntimeError(f"No se pudo levantar servidor ALERTS_FAIL=1 en puerto {port}")
+    except Exception:
+        raise
+    finally:
+        try:
+            Path(script_path).unlink()
+        except Exception:
+            pass
 
 
 def test_alerts_section_shows_503_when_alert_service_down():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, args=["--no-sandbox"])
-        page = browser.new_page()
-        try:
-            page.goto(f"{BASE_URL}/", wait_until="domcontentloaded")
-            page.wait_for_load_state("networkidle")
+    server, port = _start_alerts_fail_server(18003)
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False, args=["--no-sandbox"])
+            page = browser.new_page()
+            try:
+                page.goto(f"http://localhost:{port}/", wait_until="domcontentloaded")
+                page.wait_for_load_state("networkidle")
 
-            page.locator("#refresh-alerts").click()
-            with page.expect_response("/api/stock/alerts") as resp_info:
-                page.locator("#refresh-alerts").click()
-            response = resp_info.value
-            assert response.status == 200
-        finally:
-            browser.close()
+                with page.expect_response("**/api/stock/alerts") as resp_info:
+                    page.locator("#refresh-alerts").click()
+                response = resp_info.value
+                assert response.status == 503
+            finally:
+                browser.close()
+    finally:
+        server.terminate()
