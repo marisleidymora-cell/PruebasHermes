@@ -1,5 +1,6 @@
 # Bitácora QA — rama yeraldine
 Última actualización: 2026-06-30
+Qué hay: registro de cambios, estado actual y pendientes del trabajo QA.
 
 ## Resumen del día
 Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el código del sistema; solo armamos pruebas automáticas y documentación.
@@ -29,10 +30,13 @@ Hoy trabajamos en puro QA sobre el sistema `gestor-inventario`. No tocamos el c�
 ## Estado actual
 - API: suite documentada inline (27 pruebas totales API+E2E).
 - E2E: suite completa ejecutada (`tests/e2e -q`) con SUT levantado en `http://localhost:8000`.
-  - 9 pruebas pasadas.
-  - 0 pruebas fallidas.
+  - 9+ pruebas pasadas.
+  - 0 pruebas fallidas en corridas completas.
 - Cierre de pendiente: `test_alerts_section_shows_503_when_alert_service_down` ajustada para levantar un servidor auxiliar con `ALERTS_FAIL=1` y validar 503 desde la UI.
   - Clasificación: hallazgo cubierto con prueba automatizada.
+- Documentación: se agregan encabezados “Qué hay:” en todos los `docs/*.md`.
+- Reportes: se integra Allure (`allure-pytest`), con limpieza automática de `allure-results/` al inicio de cada suite y comandos listos en `docs/resumen_qa.md`.
+- Repo: `.gitignore` incluye `allure-results/` y `allure-report/` para evitar artefactos en commits.
 - Documentación inline completada en archivos `tests/api/*.py` y `tests/e2e/*.py`.
 
 ## Pendientes / Riesgos abiertos

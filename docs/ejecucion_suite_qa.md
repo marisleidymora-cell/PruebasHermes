@@ -1,4 +1,5 @@
 # Ejecución de la suite QA — rama yeraldine
+Qué hay: comandos usados, resultados reales, evidencia y estado del repo.
 
 ## Contexto
 - SUT: `gestor-inventario` (`reto-ai-first-fase1/3-challenge/gestor-inventario`)

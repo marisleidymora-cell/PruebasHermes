@@ -1,4 +1,5 @@
 # Reporte de Defectos
+Qué hay: defectos confirmados con severidad, pasos de repro y vínculo a evidencia automatizada.
 
 ## Resumen
 Se registran hallazgos basados en ejecución real del SUT en `localhost:8000` en modo normal (`ALERTS_FAIL` sin activar).

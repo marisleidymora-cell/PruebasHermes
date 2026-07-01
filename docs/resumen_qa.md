@@ -1,4 +1,5 @@
 # Resumen QA — Gestor de Inventario (rama `yeraldine`)
+Qué hay: resumen del SUT, hallazgos, suites ejecutadas, comandos de corrida y reporte Allure.
 
 ## 1) ¿Qué es el SUT?
 
@@ -116,3 +117,16 @@ BASE_URL=http://localhost:8000 ALERTS_FAIL=0 python -m pytest tests/e2e/test_ui_
 ```
 
 > Nota: esa prueba levanta automáticamente un servidor auxiliar con `ALERTS_FAIL=1` en puerto 18003 para aislar el escenario de caída.
+
+## 5.6 Abrir el reporte Allure
+```bash
+allure serve ~/Desktop/PruebasHermes-trackQA/allure-results
+```
+
+## 5.7 Generar reporte Allure estático
+```bash
+allure generate --clean -o ~/Desktop/PruebasHermes-trackQA/allure-report ~/Desktop/PruebasHermes-trackQA/allure-results
+open ~/Desktop/PruebasHermes-trackQA/allure-report/index.html
+```
+
+> Nota: `allure-results/` y `allure-report/` están ignorados en `.gitignore` para no subir artefactos.

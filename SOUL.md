@@ -10,11 +10,13 @@
 - Ambiente: servidor local en `http://localhost:8000`
 - Ejecución: `pytest` con `httpx` contra el SUT
 - Modo ejecutado: SIN `ALERTS_FAIL=1` (ruta feliz) y con intento controlado de 503
+- Reportes: Allure integrado; se limpia `allure-results/` al inicio y sirve HTML con `allure serve`
 
 ## Herramientas
 - Python 3.12 / 3.11
 - pytest 9.1.1 + httpx 0.28.1
 - Playwright Chromium 1223
+- allure-pytest + allure CLI
 - uvicorn para levantar el SUT
 - curl para diagnosis rápida
 

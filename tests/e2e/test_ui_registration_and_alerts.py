@@ -2,6 +2,7 @@ import os
 import time
 
 from playwright.sync_api import sync_playwright
+from conftest import write_allure_screenshot
 
 BASE_URL = "http://localhost:8000"
 
@@ -20,6 +21,7 @@ def test_register_movement_and_refresh_alerts_ui_flow():
             page.wait_for_load_state("networkidle")
             _assert_has(page.content(), "Gestor de Inventario")
             assert page.locator("#products-body").count() == 1
+            write_allure_screenshot(page, "ui_before_movement")
 
             first_option_text = page.locator("#mov-product option").first.text_content()
             assert first_option_text is not None and len(first_option_text) > 0
@@ -40,12 +42,12 @@ def test_register_movement_and_refresh_alerts_ui_flow():
             time.sleep(1)
             new_stock_text = page.locator("td[data-stock] strong").first.text_content()
             assert new_stock_text != initial_stock_text
+            write_allure_screenshot(page, "ui_after_movement")
         finally:
             browser.close()
 
 
 def _start_alerts_fail_server(port: int = 18003):
-    import os
     import subprocess
     import sys
     import time
@@ -105,10 +107,12 @@ def test_alerts_section_shows_503_when_alert_service_down():
             try:
                 page.goto(f"http://localhost:{port}/", wait_until="domcontentloaded")
                 page.wait_for_load_state("networkidle")
+                write_allure_screenshot(page, "alerts_503_before_click")
 
                 with page.expect_response("**/api/stock/alerts") as resp_info:
                     page.locator("#refresh-alerts").click()
                 response = resp_info.value
+                write_allure_screenshot(page, "alerts_503_after_click")
                 assert response.status == 503
             finally:
                 browser.close()

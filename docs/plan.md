@@ -1,4 +1,5 @@
 # Plan de Pruebas — GestorInventario
+Qué hay: estrategia formal, alcance, riesgos y criterios de aceptación.
 
 ## Estrategia
 - Pruebas de API sobre endpoints REST en `http://localhost:8000`.

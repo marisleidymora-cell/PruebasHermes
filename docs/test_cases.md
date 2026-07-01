@@ -1,5 +1,5 @@
 # Casos de Prueba — GestorInventario
-Correspondencia directa con la suite automatizada en `tests/`.
+Qué hay: matriz de casos API + E2E, códigos TC-API-01..17 y TC-E2E-01..07, alineada a tests/ y a docs/gherkin_features.feature.
 
 ## Resumen de cobertura real
 
@@ -80,3 +80,9 @@ Feature: Alertas de stock mínimo desde frontend
     When consulto /api/stock/alerts bajo ALERTS_FAIL=1
     Then la API debería devolver 503
     But la UI sigue funcionando sin excepción visible
+
+# =============================================================================
+# Trazabilidad a escenarios Gherkin
+# =============================================================================
+- Todos los casos de prueba anteriores están reflejados en `docs/gherkin_features.feature`.
+- Los tags `@TC-...` en el archivo `.feature` se alinean 1 a 1 con los códigos de esta matriz.
