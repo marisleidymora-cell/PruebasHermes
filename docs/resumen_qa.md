@@ -41,7 +41,7 @@ Se diseñó y ejecutó una estrategia de pruebas completa sobre el SUT, aligned 
 - `tests/e2e/test_home.py`
 - `tests/e2e/test_ui_registration_and_alerts.py` (incluye escenario 503 aislado)
 
-**Total:** 27 pruebas.
+**Total:** 25 pruebas (18 API + 7 E2E).
 
 ---
 
@@ -52,13 +52,13 @@ Se diseñó y ejecutó una estrategia de pruebas completa sobre el SUT, aligned 
 | D-01 | Alta | `POST /api/stock/movement` con `type=OUT` y cantidad mayor al stock disponible → acepta; stock queda negativo. |
 | D-02 | Media | `qty` acepta valores decimales (`float`) cuando debería ser entero. |
 | D-03 | Media | `POST /api/products` acepta `min_stock=-1` y `cost_cents=-1000` sin validación. |
-| D-04 | Hallazgo de entorno | El 503 en `/api/stock/alerts` se produce solo cuando el SUT se arranca con `ALERTS_FAIL=1`. Se agregó prueba E2E aislada para cubrir ese escenario. |
+| D-04 | Hallazgo de entorno | El 503 en `/api/stock/alerts` requiere que el SUT arranque con `ALERTS_FAIL=1` desde el inicio; no se reproduce activando la variable en caliente sobre una instancia ya corriendo. Se agregó prueba E2E con servidor auxiliar aislado que confirma el 503 real. |
 
 ---
 
 ## 4) Estado actual
 
-- Suite completa: **27 passed, 0 failed**.
+- Suite completa: **25 passed, 0 failed** (18 API + 7 E2E).
 - Rama: `yeraldine`.
 - Documentación actualizada en `docs/` del repo QA.
 

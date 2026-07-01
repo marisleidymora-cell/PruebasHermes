@@ -1,13 +1,17 @@
 # Casos de Prueba — GestorInventario
-Qué hay: matriz de casos API + E2E, códigos TC-API-01..17 y TC-E2E-01..07, alineada a tests/ y a docs/gherkin_features.feature.
+Qué hay: matriz de casos API + E2E, códigos TC-API-01..18 y TC-E2E-01..07, alineada a tests/ y a docs/gherkin_features.feature.
 
 ## Resumen de cobertura real
 
 - API: 18 pruebas en `tests/api`.
-- E2E: 6 pruebas verdes en `tests/e2e` (`tests/e2e/test_playwright_suite.py`).
-- Pendiente de cierre: 1 prueba E2E en `tests/e2e/test_ui_registration_and_alerts.py` atada al escenario 503.
+- E2E: 7 pruebas verdes en `tests/e2e`.
+- Total suite: 25 pasadas, 0 falladas (verificado con `python -m pytest -v`).
 
-limitación confirmada: con `ALERTS_FAIL=1`, `GET /api/stock/alerts` sigue devolviendo 200 en la instancia del SUT en uso, por lo que el escenario 503 desde UI queda como hallazgo/comportamiento no reproducible en este entorno.
+Escenario 503 resuelto: `tests/e2e/test_ui_registration_and_alerts.py::test_alerts_section_shows_503_when_alert_service_down`
+levanta un servidor auxiliar del SUT en el puerto 18003 con `ALERTS_FAIL=1` para aislar el caso y confirma que
+`GET /api/stock/alerts` responde 503 desde la UI. Riesgo conocido: ese test depende de una ruta local fija
+(`~/Desktop/reto-ai-first-fase1/reto-ai-first-fase1/3-challenge/gestor-inventario`); si esa carpeta se mueve o
+se borra, el test deja de poder levantar el servidor auxiliar.
 
 ## Matriz de casos por código
 
@@ -36,6 +40,9 @@ limitación confirmada: con `ALERTS_FAIL=1`, `GET /api/stock/alerts` sigue devol
 - TC-API-16 | POST /api/stock/movement | Happy | type=IN, qty=7 | stock +=7 exacto
 - TC-API-17 | POST /api/stock/movement | Happy | type=OUT, qty=3 | stock -=3 exacto
 
+### tests/api/test_movements_log.py
+- TC-API-18 | GET /api/movements | Happy | - | 200, lista, orden desc por id
+
 ### tests/e2e/test_playwright_suite.py
 - TC-E2E-01 | UI homepage | Happy | - | Carga contenido
 - TC-E2E-02 | UI lista productos | Happy | - | Producto seed visible
@@ -43,7 +50,7 @@ limitación confirmada: con `ALERTS_FAIL=1`, `GET /api/stock/alerts` sigue devol
 
 ### tests/e2e/test_ui_registration_and_alerts.py
 - TC-E2E-04 | UI movimiento + alertas | Happy | - | Flujo IN/OUT + refresh alertas
-- TC-E2E-05 | UI alert 503 | Negativo | ALERTS_FAIL=1 | Pendiente por comportamiento SUT
+- TC-E2E-05 | UI alert 503 | Negativo | ALERTS_FAIL=1 (servidor auxiliar puerto 18003) | 503 confirmado desde UI
 
 ### tests/e2e/test_frontend_flow.py
 - TC-E2E-06 | UI browse products | Happy | - | Lectura productos desde UI

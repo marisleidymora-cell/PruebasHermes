@@ -22,4 +22,16 @@ Se registran hallazgos basados en ejecución real del SUT en `localhost:8000` en
 - Resultado: 201 (no hay validación de negativos)
 - Evidencia: respuesta HTTP 201 y valores persistidos
 
-Nota: laSuite API valida estos caminos para dejar evidencia reproducible de los defectos.
+### D-04: Simulación de fallo de alertas depende de arranque con ALERTS_FAIL=1
+- Severidad: Hallazgo de entorno (no bloqueante)
+- Escenario: `GET /api/stock/alerts` con la variable `ALERTS_FAIL=1` activa
+- Resultado: si el SUT ya está corriendo sin esa variable, activarla no cambia el comportamiento en caliente;
+  la instancia debe arrancarse con `ALERTS_FAIL=1` desde el inicio para que el endpoint responda 503.
+- Evidencia: `tests/e2e/test_ui_registration_and_alerts.py::test_alerts_section_shows_503_when_alert_service_down`
+  levanta un servidor auxiliar propio (puerto 18003) con `ALERTS_FAIL=1` desde el arranque y confirma 503 real
+  desde la UI. Test pasa en verde.
+- Riesgo residual: el test depende de una ruta local fija al SUT
+  (`~/Desktop/reto-ai-first-fase1/reto-ai-first-fase1/3-challenge/gestor-inventario`); si esa carpeta cambia
+  de ubicación, el aislamiento del servidor auxiliar deja de funcionar.
+
+Nota: la suite API valida estos caminos para dejar evidencia reproducible de los defectos.
