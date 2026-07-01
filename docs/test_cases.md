@@ -1,17 +1,25 @@
 # Casos de Prueba — GestorInventario
-Qué hay: matriz de casos API + E2E, códigos TC-API-01..18 y TC-E2E-01..07, alineada a tests/ y a docs/gherkin_features.feature.
+Qué hay: matriz de casos API + E2E, códigos TC-API-01..20 y TC-E2E-01..05, alineada a tests/ y a docs/gherkin_features.feature.
 
 ## Resumen de cobertura real
 
-- API: 18 pruebas en `tests/api`.
-- E2E: 7 pruebas verdes en `tests/e2e`.
-- Total suite: 25 pasadas, 0 falladas (verificado con `python -m pytest -v`).
+- API: 21 pruebas en `tests/api` (incluye 2 smoke de frontend reclasificados desde E2E).
+- E2E real (navegador): 5 pruebas verdes en `tests/e2e`.
+- Total suite: 28 pasadas, 0 falladas — verificado con `python -m pytest -v`, corrido 3 veces
+  seguidas sin cambios de resultado (suite repetible, ver nota de aislamiento de datos abajo).
 
 Escenario 503 resuelto: `tests/e2e/test_ui_registration_and_alerts.py::test_alerts_section_shows_503_when_alert_service_down`
-levanta un servidor auxiliar del SUT en el puerto 18003 con `ALERTS_FAIL=1` para aislar el caso y confirma que
-`GET /api/stock/alerts` responde 503 desde la UI. Riesgo conocido: ese test depende de una ruta local fija
-(`~/Desktop/reto-ai-first-fase1/reto-ai-first-fase1/3-challenge/gestor-inventario`); si esa carpeta se mueve o
-se borra, el test deja de poder levantar el servidor auxiliar.
+levanta un servidor auxiliar del SUT con `ALERTS_FAIL=1` para aislar el caso y confirma que
+`GET /api/stock/alerts` responde 503 desde la UI. El mismo mecanismo ahora también se usa desde
+la suite de API (`tests/api/test_stock_movements.py`) mediante la fixture `alerts_fail_client`.
+
+Aislamiento de datos: la mayoría de los tests que antes mutaban los productos semilla (id=1, id=2)
+ahora usan la fixture `fresh_product`, que crea un producto nuevo por test. Esto hace que la suite
+sea repetible: correrla varias veces seguidas no acumula cambios de stock ni afecta a otros tests.
+
+Riesgo conocido: el escenario 503 (API y E2E) depende de una ruta local fija al SUT
+(`~/Desktop/reto-ai-first-fase1/reto-ai-first-fase1/3-challenge/gestor-inventario`); si esa carpeta
+se mueve o se borra, esos tests dejan de poder levantar su servidor auxiliar.
 
 ## Matriz de casos por código
 
@@ -29,34 +37,46 @@ se borra, el test deja de poder levantar el servidor auxiliar.
 
 ### tests/api/test_stock_movements.py
 - TC-API-11 | GET /api/stock/alerts | Happy | env limpio | 200, lista
-- TC-API-12 | POST /api/stock/movement | Happy | type=OUT, qty=1 | 201
-- TC-API-13 | POST /api/stock/movement | Negativo | aislar ALERTS_FAIL | validación especial
+- TC-API-12 | GET /api/stock/alerts | Negativo/Integración | servidor auxiliar ALERTS_FAIL=1 | 503 real confirmado
+- TC-API-13 | POST /api/stock/movement (OUT) | Negativo/Integración | servidor auxiliar ALERTS_FAIL=1 | 503 real confirmado
+- TC-API-14 | POST /api/stock/movement (OUT) | Happy | fresh_product, qty=1 | 201
+
+### tests/api/test_stock_movements.py — frontera de qty
+- TC-API-15 | POST /api/stock/movement (IN) | Frontera | qty=0 | 201, stock sin cambios (BUG/hallazgo)
+- TC-API-16 | POST /api/stock/movement (IN) | Frontera | qty=-5 | 201, stock resta en vez de sumar (BUG/hallazgo)
 
 ### tests/api/test_negative_movements.py
-- TC-API-14 | POST /api/stock/movement | Negativo | tipo inválido | 400
-- TC-API-15 | POST /api/stock/movement | Negativo | producto inexistente | 404
+- TC-API-17 | POST /api/stock/movement | Negativo | tipo inválido | 400
+- TC-API-18 | POST /api/stock/movement | Negativo | producto inexistente | 404
 
 ### tests/api/test_data_integrity.py
-- TC-API-16 | POST /api/stock/movement | Happy | type=IN, qty=7 | stock +=7 exacto
-- TC-API-17 | POST /api/stock/movement | Happy | type=OUT, qty=3 | stock -=3 exacto
+- TC-API-19 | POST /api/stock/movement | Happy | type=IN, qty=7, fresh_product | stock +=7 exacto
+- TC-API-20 | POST /api/stock/movement | Happy | type=OUT, qty=3, fresh_product | stock -=3 exacto
 
 ### tests/api/test_movements_log.py
-- TC-API-18 | GET /api/movements | Happy | - | 200, lista, orden desc por id
+- TC-API-21 | GET /api/movements | Happy | - | 200, lista, orden desc por id
+
+### tests/api/test_frontend_smoke.py
+(Reclasificado desde E2E: usa httpx, no navegador — ver nota abajo)
+- TC-SMOKE-01 | GET / | Happy | - | 200
+- TC-SMOKE-02 | GET /api/products, /api/products/1 | Happy | - | 200
 
 ### tests/e2e/test_playwright_suite.py
 - TC-E2E-01 | UI homepage | Happy | - | Carga contenido
 - TC-E2E-02 | UI lista productos | Happy | - | Producto seed visible
-- TC-E2E-03 | UI alert flow | Happy | - | Accede a home
+- TC-E2E-03 | UI alert flow | Happy | - | Click real en "Consultar alertas", respuesta 200 y sección visible
 
 ### tests/e2e/test_ui_registration_and_alerts.py
 - TC-E2E-04 | UI movimiento + alertas | Happy | - | Flujo IN/OUT + refresh alertas
-- TC-E2E-05 | UI alert 503 | Negativo | ALERTS_FAIL=1 (servidor auxiliar puerto 18003) | 503 confirmado desde UI
+- TC-E2E-05 | UI alert 503 | Negativo | ALERTS_FAIL=1 (servidor auxiliar, helper centralizado en conftest.py) | 503 confirmado desde UI
 
-### tests/e2e/test_frontend_flow.py
-- TC-E2E-06 | UI browse products | Happy | - | Lectura productos desde UI
+## Nota de reclasificación (E2E real vs smoke de frontend)
 
-### tests/e2e/test_home.py
-- TC-E2E-07 | UI home HTTP | Happy | - | 200 en home
+Antes existían `tests/e2e/test_home.py` y `tests/e2e/test_frontend_flow.py`, etiquetados como E2E pero
+implementados con `httpx` (peticiones HTTP directas), sin abrir ningún navegador. Eso inflaba el conteo
+de "pruebas E2E" con pruebas que en realidad eran API. Se movieron a `tests/api/test_frontend_smoke.py`
+y se renombraron TC-SMOKE-01/02 para reflejar lo que de verdad hacen. Los únicos códigos TC-E2E-xx que
+quedan son pruebas que abren Chromium de verdad con Playwright.
 
 ## Gherkin Scenarios vigentes
 

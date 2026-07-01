@@ -2,7 +2,7 @@ import os
 import time
 
 from playwright.sync_api import sync_playwright
-from conftest import write_allure_screenshot
+from conftest import write_allure_screenshot, start_alerts_fail_server, stop_alerts_fail_server
 
 BASE_URL = "http://localhost:8000"
 
@@ -47,59 +47,15 @@ def test_register_movement_and_refresh_alerts_ui_flow():
             browser.close()
 
 
-def _start_alerts_fail_server(port: int = 18003):
-    import subprocess
-    import sys
-    import time
-    import tempfile
-    from pathlib import Path
-    from urllib.request import urlopen
-
-    env = os.environ.copy()
-    env["ALERTS_FAIL"] = "1"
-    sut_dir = Path.home() / "Desktop" / "reto-ai-first-fase1" / "reto-ai-first-fase1" / "3-challenge" / "gestor-inventario"
-    fd, script_path = tempfile.mkstemp(suffix=".py", prefix=f"sut_alerts_{port}_")
-    try:
-        with os.fdopen(fd, "w") as f:
-            f.write(
-                f"import os\n"
-                f"os.chdir({str(sut_dir)!r})\n"
-                f"import sys\n"
-                f"sys.path.insert(0, str({str(sut_dir)!r}))\n"
-                f"from app import app\n"
-                f"import uvicorn\n"
-                f"config = uvicorn.Config(app, host='127.0.0.1', port={port}, log_level='error')\n"
-                f"server = uvicorn.Server(config)\n"
-                f"server.run()\n"
-            )
-        python = sys.executable
-        proc = subprocess.Popen(
-            [python, script_path],
-            cwd=str(sut_dir),
-            env=env,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        url = f"http://127.0.0.1:{port}/api/health"
-        for _ in range(50):
-            try:
-                urlopen(url, timeout=0.3)
-                return proc, port
-            except Exception:
-                time.sleep(0.25)
-        proc.terminate()
-        raise RuntimeError(f"No se pudo levantar servidor ALERTS_FAIL=1 en puerto {port}")
-    except Exception:
-        raise
-    finally:
-        try:
-            Path(script_path).unlink()
-        except Exception:
-            pass
-
-
 def test_alerts_section_shows_503_when_alert_service_down():
-    server, port = _start_alerts_fail_server(18003)
+    """
+    Escenario 503 desde la UI: usa el mismo helper centralizado en
+    conftest.py (`start_alerts_fail_server` / `stop_alerts_fail_server`)
+    que también usa la suite de API para el mismo propósito, en vez de
+    tener su propia copia duplicada de la lógica de arranque del servidor
+    auxiliar.
+    """
+    server, port = start_alerts_fail_server(18003)
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=False, args=["--no-sandbox"])
@@ -117,4 +73,4 @@ def test_alerts_section_shows_503_when_alert_service_down():
             finally:
                 browser.close()
     finally:
-        server.terminate()
+        stop_alerts_fail_server(server)

@@ -32,11 +32,29 @@ def test_product_list_page():
 
 
 def test_alert_query_flow():
+    """
+    Prueba real de flujo de alertas: carga la home, hace click en el botón
+    "Consultar alertas" y verifica que la llamada real a
+    GET /api/stock/alerts responda 200 y que la sección de alertas se
+    actualice en el DOM.
+
+    Antes este test solo abría la home y comprobaba que no estuviera
+    vacía — no tocaba el botón de alertas ni verificaba nada relacionado
+    a alertas, a pesar de su nombre. Ahora sí ejercita el flujo real.
+    """
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False, args=["--no-sandbox"])
         page = browser.new_page()
         page.goto(f"{BASE_URL}/", wait_until="domcontentloaded")
-        assert page.content() != ""
+        page.wait_for_load_state("networkidle")
+
+        with page.expect_response("**/api/stock/alerts") as resp_info:
+            page.locator("#refresh-alerts").click()
+        response = resp_info.value
+        assert response.status == 200
+
+        # La sección de alertas debe existir en el DOM tras la respuesta.
+        assert page.locator("#alerts-section").count() == 1
         write_allure_screenshot(page, "alerts_flow")
         time.sleep(2)
         browser.close()

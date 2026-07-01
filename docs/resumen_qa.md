@@ -30,18 +30,21 @@ Se diseñó y ejecutó una estrategia de pruebas completa sobre el SUT, aligned 
 
 - `tests/api/test_api_contract.py`
 - `tests/api/test_movements_log.py`
-- `tests/api/test_stock_movements.py`
+- `tests/api/test_stock_movements.py` (incluye 503 real vía servidor auxiliar y frontera de qty)
 - `tests/api/test_negative_movements.py`
 - `tests/api/test_data_integrity.py`
+- `tests/api/test_frontend_smoke.py` (reclasificado desde E2E — ver nota abajo)
 
-### 2.2 Pruebas E2E (Playwright)
+### 2.2 Pruebas E2E (Playwright, navegador real)
 
 - `tests/e2e/test_playwright_suite.py`
-- `tests/e2e/test_frontend_flow.py`
-- `tests/e2e/test_home.py`
 - `tests/e2e/test_ui_registration_and_alerts.py` (incluye escenario 503 aislado)
 
-**Total:** 25 pruebas (18 API + 7 E2E).
+**Total:** 28 pruebas (21 API + 5 E2E + 2 smoke de frontend).
+
+> Nota de reclasificación: `tests/e2e/test_home.py` y `tests/e2e/test_frontend_flow.py` usaban `httpx`
+> (sin navegador), así que no eran E2E de verdad. Se movieron a `tests/api/test_frontend_smoke.py` para
+> que el conteo de "E2E" refleje solo pruebas que abren Chromium real.
 
 ---
 
@@ -52,13 +55,17 @@ Se diseñó y ejecutó una estrategia de pruebas completa sobre el SUT, aligned 
 | D-01 | Alta | `POST /api/stock/movement` con `type=OUT` y cantidad mayor al stock disponible → acepta; stock queda negativo. |
 | D-02 | Media | `qty` acepta valores decimales (`float`) cuando debería ser entero. |
 | D-03 | Media | `POST /api/products` acepta `min_stock=-1` y `cost_cents=-1000` sin validación. |
-| D-04 | Hallazgo de entorno | El 503 en `/api/stock/alerts` requiere que el SUT arranque con `ALERTS_FAIL=1` desde el inicio; no se reproduce activando la variable en caliente sobre una instancia ya corriendo. Se agregó prueba E2E con servidor auxiliar aislado que confirma el 503 real. |
+| D-04 | Hallazgo de entorno | El 503 en `/api/stock/alerts` requiere que el SUT arranque con `ALERTS_FAIL=1` desde el inicio; no se reproduce activando la variable en caliente. Confirmado con servidor auxiliar tanto en API como en E2E. |
+| D-05 | Media | `qty` negativo en un movimiento `IN` invierte la dirección: resta stock en vez de sumarlo. |
+| D-06 | Baja | `qty=0` se acepta y queda en el historial de movimientos aunque no cambia el stock. |
 
 ---
 
 ## 4) Estado actual
 
-- Suite completa: **25 passed, 0 failed** (18 API + 7 E2E).
+- Suite completa: **28 passed, 0 failed** (21 API + 5 E2E + 2 smoke de frontend).
+- Suite verificada repetible: corrida 3 veces seguidas sin cambios de resultado, gracias a la
+  fixture `fresh_product` que aísla los datos de cada test.
 - Rama: `yeraldine`.
 - Documentación actualizada en `docs/` del repo QA.
 
@@ -114,9 +121,12 @@ python -m pytest tests/e2e -q
 ```bash
 cd ~/Desktop/PruebasHermes-trackQA
 BASE_URL=http://localhost:8000 ALERTS_FAIL=0 python -m pytest tests/e2e/test_ui_registration_and_alerts.py::test_alerts_section_shows_503_when_alert_service_down -q
+BASE_URL=http://localhost:8000 ALERTS_FAIL=0 python -m pytest tests/api/test_stock_movements.py -k alerts_fail -q
 ```
 
-> Nota: esa prueba levanta automáticamente un servidor auxiliar con `ALERTS_FAIL=1` en puerto 18003 para aislar el escenario de caída.
+> Nota: esas pruebas levantan automáticamente un servidor auxiliar con `ALERTS_FAIL=1` (helper
+> centralizado en `tests/conftest.py`: `start_alerts_fail_server` / `stop_alerts_fail_server`),
+> cada una en un puerto distinto para poder correr varias en paralelo sin pisarse.
 
 ## 5.6 Abrir el reporte Allure
 ```bash
