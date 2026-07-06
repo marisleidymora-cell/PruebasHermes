@@ -1,0 +1,62 @@
+name: QA Track - API + E2E
+
+on:
+  push:
+    branches: [main, george-quintero]
+    paths: ["qa-tests/**", ".github/workflows/qa-tests.yml"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sut-up:
+    runs-on: ubuntu-latest
+    outputs:
+      port: ${{ steps.port.outputs.port }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install SUT deps
+        run: |
+          cd 3-challenge/gestor-inventario
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - id: port
+        run: echo "port=8000" >> "$GITHUB_OUTPUT"
+
+  api-tests:
+    needs: sut-up
+    runs-on: ubuntu-latest
+    services:
+      sut:
+        image: python:3.11-slim
+        ports: ["8000:8000"]
+        env: { ALERTS_FAIL: "0" }
+        options: >-
+          --health-cmd "python3 - <<'PY'\nimport urllib.request\nurllib.request.urlopen('http://localhost:8000/api/health').read()\nPY\n"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 10
+        run: |
+          cd /github/workspace/3-challenge/gestor-inventario
+          python3 -m pip install --quiet -r requirements.txt || true
+          python3 -m uvicorn app:app --host 0.0.0.0 --port 8000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install --quiet -r 3-challenge/gestor-inventario/requirements.txt
+      - run: pip install --quiet pytest pytest-asyncio httpx
+      - run: pytest qa-tests/tests_api.py -v
+
+  e2e-tests:
+    needs: sut-up
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: npm i -g playwright@latest
+      - run: playwright install chromium
+      - run: pip install --quiet pytest pytest-asyncio httpx
+      - run: pytest qa-tests/tests_e2e.py -v
